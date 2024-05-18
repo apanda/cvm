@@ -47,7 +47,7 @@ where
     //   A  B               B  C
     pub fn right_rotate(&mut self) {
         // Get left subtree.
-        let l = mem::replace(&mut self.left, None);
+        let l = mem::take(&mut self.left);
         if let Some(mut p) = l {
             // self now has the contents of the left subtree
             mem::swap(self, &mut *p);
@@ -64,7 +64,7 @@ where
     //     / \          / \
     //    B  C         A  B
     pub fn left_rotate(&mut self) {
-        let r = mem::replace(&mut self.right, None);
+        let r = mem::take(&mut self.right);
         if let Some(mut q) = r {
             // Self now points to the right subtree
             mem::swap(self, &mut *q);
@@ -133,16 +133,10 @@ where
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         match (&self.left, &self.right) {
-            (Some(l), Some(r)) => write!(
-                f,
-                "( {} {} {} )",
-                l.to_string(),
-                self.element.to_string(),
-                r.to_string()
-            ),
-            (None, Some(r)) => write!(f, "( _ {} {} )", self.element.to_string(), r.to_string()),
-            (Some(l), None) => write!(f, "( {} {} _ )", l.to_string(), self.element.to_string()),
-            (None, None) => write!(f, "( _ {} _ )", self.element.to_string()),
+            (Some(l), Some(r)) => write!(f, "( {} {} {} )", l, self.element, r),
+            (None, Some(r)) => write!(f, "( _ {} {} )", self.element, r),
+            (Some(l), None) => write!(f, "( {} {} _ )", l, self.element),
+            (None, None) => write!(f, "( _ {} _ )", self.element),
         }
     }
 }
