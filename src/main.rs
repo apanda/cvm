@@ -13,9 +13,9 @@ fn main() {
     t.insert(e2);
     println!("Treep is {}", t);
     let e0: Element<String> = Element::new("C".into(), 1);
-    let e1: Element<String> = Element::new("B".into(), 2);
-    let e2: Element<String> = Element::new("A".into(), 3);
-    let e3: Element<String> = Element::new("C".into(), 4);
+    let e1: Element<String> = Element::new("B".into(), 5);
+    let e2: Element<String> = Element::new("A".into(), 6);
+    let e3: Element<String> = Element::new("D".into(), 3);
     t.reset();
     t.insert(e0);
     t.insert(e1);
@@ -25,6 +25,9 @@ fn main() {
     t.insert(e3);
     println!("Treep is {} max is {}", t, t.get_max().unwrap());
     println!("Get A returns {}", t.get("A".into()).unwrap());
-
+    t.delete("A".into());
+    println!("Treep is {} max is {}", t, t.get_max().unwrap());
+    t.delete("B".into());
+    println!("Treep is {} max is {}", t, t.get_max().unwrap());
     println!("Tested");
 }
