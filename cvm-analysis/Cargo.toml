@@ -1,0 +1,9 @@
+[package]
+name = "cvm-analysis"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap = { version = "4.5.4", features = ["derive"] }
+rand = {version="0.8.5", features=["std", "std_rng"]}
+count_unique_cvm = {path = "../count_unique_cvm"}

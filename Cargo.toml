@@ -1,3 +1,3 @@
 [workspace]
-members=["treap_non_random", "count_unique_cvm"]
+members=["treap_non_random", "count_unique_cvm", "cvm-analysis"]
 resolver="2"
