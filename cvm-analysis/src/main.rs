@@ -1,8 +1,13 @@
+use count_unique_cvm::CountUnique;
+
 use clap::command;
 use clap::Parser;
-use count_unique_cvm::CountUnique;
 use rand::prelude::*;
 use rand::rngs::StdRng;
+use statrs::statistics::Data;
+use statrs::statistics::Distribution;
+use statrs::statistics::Median;
+
 use std::collections::HashSet;
 
 #[derive(Parser, Debug)]
@@ -20,8 +25,8 @@ struct Args {
 
 struct Estimator<R: Rng> {
     cvm: CountUnique<u64, R>,
-    estimates: Vec<f64>,
-    actual_values: Vec<usize>,
+    pub estimates: Vec<f64>,
+    pub actual_values: Vec<usize>,
     min_estimate: f64,
     max_estimate: f64,
     min_token: u64,
@@ -75,7 +80,25 @@ fn main() {
         args.treap_size,
     );
     for _ in 0..args.repeat {
-        let (e, r) = estimator.estimate_tokens(args.tokens);
-        println!("{} {}", e, r)
+        let _ = estimator.estimate_tokens(args.tokens);
     }
+
+    let estimated = Data::new(estimator.estimates);
+    let real_as_vec: Vec<f64> = estimator
+        .actual_values
+        .iter()
+        .map(|v| (*v) as f64)
+        .collect();
+    let real = Data::new(real_as_vec);
+    println!(
+        "Means: {} {}",
+        estimated.mean().unwrap(),
+        real.mean().unwrap()
+    );
+    println!("Medians: {} {}", estimated.median(), real.median());
+    println!(
+        "Variance: {} {}",
+        estimated.variance().unwrap(),
+        real.variance().unwrap()
+    );
 }
