@@ -21,6 +21,8 @@ struct Args {
     min_token: u64,
     #[arg(short, long, default_value_t = 65535)]
     max_token: u64,
+    #[arg(short, long)]
+    plot: Option<String>,
 }
 
 struct Estimator<R: Rng> {
@@ -101,4 +103,5 @@ fn main() {
         estimated.variance().unwrap(),
         real.variance().unwrap()
     );
+    // TODO: Add plotting.
 }

@@ -8,3 +8,4 @@ clap = { version = "4.5.4", features = ["derive"] }
 rand = {version="0.8.5", features=["std", "std_rng"]}
 count_unique_cvm = {path = "../count_unique_cvm"}
 statrs = "0.16.0"
+plotters = "0.3.5"
