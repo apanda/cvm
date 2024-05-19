@@ -49,6 +49,7 @@ where
     P: Ord,
 {
     root: Option<Box<TreapNode<T, P>>>,
+    size: usize,
 }
 
 impl<T, P> Default for Treap<T, P>
@@ -68,7 +69,10 @@ where
 {
     /// Create a new Treap.
     pub fn new() -> Treap<T, P> {
-        Treap { root: None }
+        Treap {
+            root: None,
+            size: 0,
+        }
     }
 
     fn set_root(&mut self, root: Element<T, P>) {
@@ -78,13 +82,21 @@ where
     /// Reset the Treap, removing all items.
     pub fn reset(&mut self) {
         mem::take(&mut self.root);
+        self.size = 0;
     }
 
     /// Insert (or update) an item.
     pub fn insert(&mut self, element: Element<T, P>) {
         match &mut self.root {
-            None => self.set_root(element),
-            Some(e) => e.insert(element.into()),
+            None => {
+                self.set_root(element);
+                self.size = 1;
+            }
+            Some(e) => {
+                if e.insert_or_replace(element.into()) {
+                    self.size += 1;
+                }
+            }
         }
     }
 
@@ -103,31 +115,48 @@ where
         match &mut self.root {
             None => {}
             Some(r) => {
-                if *r.element.value() == e {
+                let deleted = if *r.element.value() == e {
                     if r.left.is_none() && r.right.is_none() {
-                        self.reset()
+                        self.reset();
+                        false
                     } else if r.left.is_none() && r.right.is_some() {
                         r.rotate_left();
-                        r.delete(e);
+                        r.delete(e)
                     } else if r.right.is_none() && r.left.is_some() {
                         r.rotate_right();
-                        r.delete(e);
+                        r.delete(e)
                     } else {
                         let p_left = r.left.as_ref().unwrap().element.priority();
                         let p_right = r.right.as_ref().unwrap().element.priority();
                         if p_left < p_right {
                             r.rotate_left();
-                            r.delete(e);
+                            r.delete(e)
                         } else {
                             r.rotate_right();
-                            r.delete(e);
+                            r.delete(e)
                         }
                     }
                 } else {
                     r.delete(e)
+                };
+                if deleted {
+                    self.size -= 1;
                 }
             }
         }
+    }
+
+    /// Get the number of elements in `self`.
+    pub fn size(&self) -> usize {
+        self.size
+    }
+
+    #[cfg(test)]
+    fn maintains_heap(&self) -> bool {
+        self.root
+            .as_ref()
+            .map(|r| r.maintains_heap())
+            .unwrap_or(true)
     }
 }
 
@@ -163,6 +192,8 @@ mod test {
     #[test]
     fn max_is_correct() {
         let t = setup_standard_treap();
+        assert!(t.maintains_heap());
+        assert!(t.size() == 7);
         let m = t.get_max();
         assert!(m.is_some());
         assert!(m.unwrap().value().eq("hi".into()));
@@ -171,10 +202,30 @@ mod test {
     #[test]
     fn delete_works() {
         let mut t = setup_standard_treap();
+        assert!(t.maintains_heap());
         let before = t.get("lo".into());
         assert!(before.is_some());
+        assert!(t.size() == 7);
         t.delete("lo".into());
+        assert!(t.maintains_heap());
         let after = t.get("lo".into());
         assert!(after.is_none());
+        assert!(t.size() == 6);
+    }
+
+    #[test]
+    fn insert_works() {
+        let mut t = setup_standard_treap();
+        let prev_max = *t.get_max().unwrap().priority();
+        let prev_size = t.size();
+        let _ = prev_size;
+        t.insert(Element::new("new".into(), prev_max + 1));
+        assert!(t.maintains_heap());
+        assert!(t.size() == prev_size + 1);
+        assert!(*(t.get_max().unwrap().priority()) == prev_max + 1);
+        t.insert(Element::new("new2".into(), prev_max - 2));
+        assert!(t.maintains_heap());
+        assert!(t.size() == prev_size + 2);
+        assert!(*(t.get_max().unwrap().priority()) == prev_max + 1);
     }
 }

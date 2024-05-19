@@ -27,21 +27,23 @@ where
     T: Ord,
     P: Ord,
 {
-    fn left_insert(&mut self, node: Self) {
+    fn left_insert(&mut self, node: Self) -> bool {
         match &mut self.left {
             None => {
                 let _ = mem::replace(&mut self.left, Some(Box::new(node)));
+                true
             }
-            Some(e) => e.insert(node),
+            Some(e) => e.insert_or_replace(node),
         }
     }
 
-    fn right_insert(&mut self, node: Self) {
+    fn right_insert(&mut self, node: Self) -> bool {
         match &mut self.right {
             None => {
                 let _ = mem::replace(&mut self.right, Some(Box::new(node)));
+                true
             }
-            Some(e) => e.insert(node),
+            Some(e) => e.insert_or_replace(node),
         }
     }
 
@@ -83,7 +85,8 @@ where
     }
 
     /// Insert a new node or modify an existing one.
-    pub fn insert(&mut self, node: Self) {
+    /// Return true if a new node is inserted.
+    pub fn insert_or_replace(&mut self, node: Self) -> bool {
         match self.element.value().cmp(node.element.value()) {
             Ordering::Equal => {
                 let _ = mem::replace(self, node);
@@ -91,19 +94,22 @@ where
                     self.rotate_right()
                 } else if !self.heap_check(&self.right) {
                     self.rotate_left()
-                }
+                };
+                false
             }
             Ordering::Greater => {
-                self.left_insert(node);
+                let r = self.left_insert(node);
                 if !self.heap_check(&self.left) {
                     self.rotate_right()
-                }
+                };
+                r
             }
             Ordering::Less => {
-                self.right_insert(node);
+                let r = self.right_insert(node);
                 if !self.heap_check(&self.right) {
                     self.rotate_left()
-                }
+                };
+                r
             }
         }
     }
@@ -155,7 +161,7 @@ where
     /// Delete a node with element `e`. Note, we cannot delete the root itself,
     /// for one we might have nothing to replace it with. The Treap itself takes
     /// care of this problem.
-    pub fn delete(&mut self, e: T) {
+    pub fn delete(&mut self, e: T) -> bool {
         match &self.element.value().cmp(&e) {
             Ordering::Equal => {
                 panic!("You don't want to do this, it is bad idea.")
@@ -163,19 +169,25 @@ where
             Ordering::Greater => {
                 if self.left.is_some() {
                     if *(self.left.as_ref().unwrap().element.value()) == e {
-                        self.delete_child(TreapChild::Left)
+                        self.delete_child(TreapChild::Left);
+                        true
                     } else {
                         self.left.as_deref_mut().unwrap().delete(e)
                     }
+                } else {
+                    false
                 }
             }
             Ordering::Less => {
                 if self.right.is_some() {
                     if *(self.right.as_ref().unwrap().element.value()) == e {
-                        self.delete_child(TreapChild::Right)
+                        self.delete_child(TreapChild::Right);
+                        true
                     } else {
                         self.right.as_deref_mut().unwrap().delete(e)
                     }
+                } else {
+                    false
                 }
             }
         }
@@ -216,6 +228,32 @@ where
                 TreapChild::Right => mem::take(&mut self.right),
             };
         }
+    }
+
+    #[cfg(test)]
+    pub fn maintains_heap(&self) -> bool {
+        let left_test = self
+            .left
+            .as_ref()
+            .map(|n| n.element.priority() <= self.element.priority())
+            .unwrap_or(true);
+        let right_test = self
+            .right
+            .as_ref()
+            .map(|n| n.element.priority() <= self.element.priority())
+            .unwrap_or(true);
+        left_test
+            && right_test
+            && self
+                .left
+                .as_ref()
+                .map(|n| n.maintains_heap())
+                .unwrap_or(true)
+            && self
+                .right
+                .as_ref()
+                .map(|n| n.maintains_heap())
+                .unwrap_or(true)
     }
 }
 
