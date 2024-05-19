@@ -1,44 +1,81 @@
-use std::fs::File;
-use std::io::BufRead;
-use std::io::BufReader;
-use std::io::Seek;
-
 use clap::command;
 use clap::Parser;
 use count_unique_cvm::CountUnique;
 use rand::prelude::*;
 use rand::rngs::StdRng;
+use std::collections::HashSet;
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Args {
-    #[arg(short, long)]
-    filename: String,
-
-    #[arg(short, long, default_value_t = 1)]
+    treap_size: usize,
+    tokens: u64,
+    #[arg(short, long, default_value_t = 10)]
     repeat: usize,
+    #[arg(short, long, default_value_t = 23)]
+    min_token: u64,
+    #[arg(short, long, default_value_t = 65535)]
+    max_token: u64,
 }
 
-fn estimate(reader: &mut BufReader<File>) {
-    let mut ctr = CountUnique::new(StdRng::from_entropy(), 1024);
-    let mut buf: Vec<u8> = vec![];
-    for t in reader.split(b' ') {
-        if t.is_ok() {
-            ctr.add_token(String::from_utf8(t.unwrap()).unwrap());
-        } else {
-            break;
+struct Estimator<R: Rng> {
+    cvm: CountUnique<u64, R>,
+    estimates: Vec<f64>,
+    actual_values: Vec<usize>,
+    min_estimate: f64,
+    max_estimate: f64,
+    min_token: u64,
+    max_token: u64,
+    stream_rng: R,
+    token_set: HashSet<u64>,
+}
+
+impl<R: Rng> Estimator<R> {
+    pub fn new(stream_rng: R, min: u64, max: u64, treap_rng: R, sz: usize) -> Self {
+        Estimator {
+            cvm: CountUnique::new(treap_rng, sz),
+            estimates: vec![],
+            actual_values: vec![],
+            min_estimate: f64::MAX,
+            max_estimate: f64::MIN,
+            stream_rng: stream_rng,
+            min_token: min,
+            max_token: max,
+            token_set: Default::default(),
         }
-        buf.clear();
     }
-    println!("{}", ctr.estimate().unwrap());
+    pub fn estimate_tokens(&mut self, tokens: u64) -> (f64, usize) {
+        self.cvm.reset();
+        self.token_set.clear();
+        for _ in 0..tokens {
+            let tok = self.stream_rng.gen_range(self.min_token..=self.max_token);
+            self.token_set.insert(tok);
+            self.cvm.add_token(tok);
+        }
+        let estimate = self.cvm.estimate().unwrap();
+        if self.min_estimate >= estimate {
+            self.min_estimate = estimate
+        };
+        if self.max_estimate <= estimate {
+            self.max_estimate = estimate
+        };
+        self.estimates.push(estimate);
+        self.actual_values.push(self.token_set.len());
+        (estimate, self.token_set.len())
+    }
 }
 
 fn main() {
     let args = Args::parse();
-    let input = File::open(args.filename).unwrap();
-    let mut reader = BufReader::new(input);
+    let mut estimator = Estimator::new(
+        StdRng::from_entropy(),
+        args.min_token,
+        args.max_token,
+        StdRng::from_entropy(),
+        args.treap_size,
+    );
     for _ in 0..args.repeat {
-        estimate(&mut reader);
-        reader.seek(std::io::SeekFrom::Start(0)).unwrap();
+        let (e, r) = estimator.estimate_tokens(args.tokens);
+        println!("{} {}", e, r)
     }
 }
