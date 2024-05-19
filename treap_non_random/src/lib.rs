@@ -17,6 +17,7 @@
 //!
 //! # Example
 //! ```
+//! use treap_non_random as treap;
 //! use treap::{Element, Treap};
 //!
 //! let mut t: Treap<String, i32> = Treap::new();
