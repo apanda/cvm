@@ -1,6 +1,6 @@
 [package]
 name = "treap_non_random"
-version = "0.1.0"
+version = "0.1.0-alpha"
 edition = "2021"
 license = "BSD-2-Clause"
 description = "A non-randomized Treap implementation. Not very useful as a balanced tree, but useful when implementing CVM or similar algorithms."
