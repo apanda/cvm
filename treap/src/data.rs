@@ -1,30 +1,37 @@
 use std::cmp::{Ord, Ordering};
 use std::fmt::{Display, Formatter, Result};
 
-/// This is fundamentally what we are storing.
-/// # Examples
+/// The element type encapsulates the data stored in the
+/// treap. It consists of a `value`, which can be used
+/// to `get` an element from the Treap, and a `priority`
+/// which orders the Treap. The Treap's `get_max()` function
+/// can be used to get the element with the largest priority.
+///
+/// # Example
 /// ```
+/// use treap::Element;
+///
 /// let e0 = Element::new("Hello", 22);
-/// let e1 = Element::new("Bye", 12);
-/// let e3 = Element::new("Hello", 21);
-/// assert!(e0 > e1);
-/// assert!(e3 < e0);
-/// println!("Tested");
+/// assert_eq!(*e0.value(), "Hello");
+/// assert_eq!(*e0.priority(), 22);
 /// ```
 pub struct Element<T: Ord, P: Ord = usize> {
-    pub value: T,
-    pub priority: P,
+    value: T,
+    priority: P,
 }
 
 impl<T: Ord, P: Ord> Element<T, P> {
+    /// Create a new Element.
     pub fn new(value: T, priority: P) -> Self {
         Element { value, priority }
     }
 
+    /// Get the Element's value.
     pub fn value(&self) -> &T {
         &self.value
     }
 
+    /// Get the Element's priority.
     pub fn priority(&self) -> &P {
         &self.priority
     }

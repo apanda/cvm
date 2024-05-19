@@ -1,8 +1,6 @@
-mod data;
-mod treap;
-use data::Element;
 use std::string::String;
-use treap::Treap;
+use treap;
+use treap::{Element, Treap};
 fn main() {
     let e0: Element<String> = Element::new("A".into(), 1);
     let e1: Element<String> = Element::new("B".into(), 2);

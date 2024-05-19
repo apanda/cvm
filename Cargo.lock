@@ -3,5 +3,12 @@
 version = 3
 
 [[package]]
-name = "cvm"
+name = "tester"
+version = "0.1.0"
+dependencies = [
+ "treap",
+]
+
+[[package]]
+name = "treap"
 version = "0.1.0"

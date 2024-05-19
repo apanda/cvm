@@ -108,6 +108,7 @@ where
         }
     }
 
+    #[allow(dead_code)]
     pub fn get_mut_node(&mut self, e: T) -> Option<&mut Self> {
         match &self.element.value().cmp(&e) {
             Ordering::Equal => Some(self),
