@@ -10,7 +10,7 @@ use std::convert::From;
 pub struct TreapNode<T, P>
 where
     T: Ord,
-    P: Ord,
+    P: PartialOrd,
 {
     pub element: Element<T, P>,
     pub left: Option<Box<TreapNode<T, P>>>,
@@ -25,7 +25,7 @@ enum TreapChild {
 impl<T, P> TreapNode<T, P>
 where
     T: Ord,
-    P: Ord,
+    P: PartialOrd,
 {
     fn left_insert(&mut self, node: Self) -> bool {
         match &mut self.left {
@@ -161,14 +161,14 @@ where
     /// Delete a node with element `e`. Note, we cannot delete the root itself,
     /// for one we might have nothing to replace it with. The Treap itself takes
     /// care of this problem.
-    pub fn delete(&mut self, e: T) -> bool {
+    pub fn delete(&mut self, e: &T) -> bool {
         match &self.element.value().cmp(&e) {
             Ordering::Equal => {
                 panic!("You don't want to do this, it is bad idea.")
             }
             Ordering::Greater => {
                 if self.left.is_some() {
-                    if *(self.left.as_ref().unwrap().element.value()) == e {
+                    if self.left.as_ref().unwrap().element.value() == e {
                         self.delete_child(TreapChild::Left);
                         true
                     } else {
@@ -180,7 +180,7 @@ where
             }
             Ordering::Less => {
                 if self.right.is_some() {
-                    if *(self.right.as_ref().unwrap().element.value()) == e {
+                    if self.right.as_ref().unwrap().element.value() == e {
                         self.delete_child(TreapChild::Right);
                         true
                     } else {
@@ -260,7 +260,7 @@ where
 impl<T, P> Display for TreapNode<T, P>
 where
     T: Ord + Display,
-    P: Ord + Display,
+    P: PartialOrd + Display,
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         match (&self.left, &self.right) {
@@ -275,7 +275,7 @@ where
 impl<T, P> From<Element<T, P>> for TreapNode<T, P>
 where
     T: Ord,
-    P: Ord,
+    P: PartialOrd,
 {
     fn from(element: Element<T, P>) -> Self {
         TreapNode {

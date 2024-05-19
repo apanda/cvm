@@ -41,7 +41,7 @@ impl<T: Ord, P: PartialOrd> Element<T, P> {
 impl<T, P> Display for Element<T, P>
 where
     T: Ord + Display,
-    P: Ord + Display,
+    P: PartialOrd + Display,
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         write!(f, "<{}, {}>", self.value, self.priority)

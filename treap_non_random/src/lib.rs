@@ -47,7 +47,7 @@ use std::{
 pub struct Treap<T, P>
 where
     T: Ord,
-    P: Ord,
+    P: PartialOrd,
 {
     root: Option<Box<TreapNode<T, P>>>,
     size: usize,
@@ -56,7 +56,7 @@ where
 impl<T, P> Default for Treap<T, P>
 where
     T: Ord,
-    P: Ord,
+    P: PartialOrd,
 {
     fn default() -> Self {
         Self::new()
@@ -66,7 +66,7 @@ where
 impl<T, P> Treap<T, P>
 where
     T: Ord,
-    P: Ord,
+    P: PartialOrd,
 {
     /// Create a new Treap.
     pub fn new() -> Treap<T, P> {
@@ -112,11 +112,11 @@ where
     }
 
     /// Delete element whose value is `e`.
-    pub fn delete(&mut self, e: T) {
+    pub fn delete(&mut self, e: &T) {
         match &mut self.root {
             None => {}
             Some(r) => {
-                let deleted = if *r.element.value() == e {
+                let deleted = if r.element.value() == e {
                     if r.left.is_none() && r.right.is_none() {
                         self.reset();
                         false
@@ -164,7 +164,7 @@ where
 impl<T, P> Display for Treap<T, P>
 where
     T: Ord + Display,
-    P: Ord + Display,
+    P: PartialOrd + Display,
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         match &self.root {
@@ -207,10 +207,12 @@ mod test {
         let before = t.get("lo".into());
         assert!(before.is_some());
         assert!(t.size() == 7);
-        t.delete("lo".into());
+        t.delete(&"lo".into());
         assert!(t.maintains_heap());
         let after = t.get("lo".into());
         assert!(after.is_none());
+        assert!(t.size() == 6);
+        t.delete(&"lo".into());
         assert!(t.size() == 6);
     }
 
