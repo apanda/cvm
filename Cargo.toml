@@ -1,3 +1,3 @@
 [workspace]
-members=["treap", "tester"]
+members=["treap_non_random", "tester"]
 resolver="2"

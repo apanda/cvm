@@ -1,6 +1,6 @@
 use std::string::String;
-use treap;
 use treap::{Element, Treap};
+use treap_non_random as treap;
 fn main() {
     let e0: Element<String> = Element::new("A".into(), 1);
     let e1: Element<String> = Element::new("B".into(), 2);

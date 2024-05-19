@@ -4,4 +4,4 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-treap={path = "../treap"}
+treap_non_random={path = "../treap_non_random"}

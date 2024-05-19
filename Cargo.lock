@@ -6,9 +6,9 @@ version = 3
 name = "tester"
 version = "0.1.0"
 dependencies = [
- "treap",
+ "treap_non_random",
 ]
 
 [[package]]
-name = "treap"
+name = "treap_non_random"
 version = "0.1.0"
