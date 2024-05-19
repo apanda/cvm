@@ -5,5 +5,5 @@ edition = "2021"
 
 [dependencies]
 conv = "0.3.3"
-rand = "0.8.5"
+rand = {version="0.8.5", features=["std", "std_rng"]}
 treap_non_random={path = "../treap_non_random"}

@@ -1,5 +1,5 @@
 use conv::*;
-use rand::{prelude::*, Rng};
+use rand::Rng;
 use treap::{Element, Treap};
 use treap_non_random as treap;
 pub struct CountUnique<T: Ord + Clone, R: Rng> {
@@ -64,10 +64,12 @@ where
 #[cfg(test)]
 mod test {
     use super::*;
+    use rand::prelude::*;
+    use rand::rngs::StdRng;
     #[test]
     pub fn sufficient_space_works() {
         let sentence = String::from("This was a triumph I am making a note here huge success");
-        let mut ctr = CountUnique::new(thread_rng(), 11);
+        let mut ctr = CountUnique::new(StdRng::from_entropy(), 11);
         let tokens = sentence.split_whitespace();
         for t in tokens {
             ctr.add_token(String::from(t));
@@ -78,7 +80,7 @@ mod test {
     #[test]
     pub fn insufficient_space_works() {
         let sentence = String::from("This was a triumph I am making a note here huge success");
-        let mut ctr = CountUnique::new(thread_rng(), 10);
+        let mut ctr = CountUnique::new(StdRng::from_entropy(), 10);
         let mut sum = 0f64;
         const RUNS: u32 = 200;
         for _ in 0..RUNS {
