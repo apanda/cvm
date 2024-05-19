@@ -9,7 +9,6 @@ use count_unique_cvm::CountUnique;
 use rand::prelude::*;
 use rand::rngs::StdRng;
 
-/// Simple program to greet a person
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Args {
