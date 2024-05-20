@@ -24,6 +24,8 @@ struct Args {
     max_token: u64,
     #[arg(short, long)]
     tokens_cdf: Option<String>,
+    #[arg(short, long)]
+    difference_cdf: Option<String>,
 }
 
 struct Estimator<R: Rng> {
@@ -73,6 +75,29 @@ impl<R: Rng> Estimator<R> {
     }
 }
 
+fn draw_cdf(fname: &String, data: &mut Vec<f64>, data_range: std::ops::Range<f64>) {
+    data.sort_by(|a, b| a.partial_cmp(b).unwrap());
+    let len = data.len() as f64;
+    let enumerated = data.iter().enumerate().map(|(x, y)| (*y, (x as f64) / len));
+    let root_area = SVGBackend::new(&fname, (1024, 768)).into_drawing_area();
+    root_area.fill(&WHITE).unwrap();
+    let mut ctx = ChartBuilder::on(&root_area)
+        .set_label_area_size(LabelAreaPosition::Left, 40)
+        .set_label_area_size(LabelAreaPosition::Bottom, 40)
+        .build_cartesian_2d(data_range, 0.0f64..1.05f64)
+        .unwrap();
+    ctx.configure_mesh().draw().unwrap();
+    ctx.draw_series(LineSeries::new(
+        enumerated,
+        ShapeStyle {
+            color: BLACK.into(),
+            filled: false,
+            stroke_width: 2,
+        },
+    ))
+    .unwrap();
+}
+
 fn main() {
     let args = Args::parse();
     let mut estimator = Estimator::new(
@@ -105,33 +130,24 @@ fn main() {
         real.variance().unwrap()
     );
     if let Some(fname) = args.tokens_cdf {
-        {
-            estimator
-                .estimates
-                .sort_by(|a, b| a.partial_cmp(b).unwrap());
-        }
-        let len = estimator.estimates.len() as f64;
-        let enumerated = estimator
-            .estimates
-            .iter()
-            .enumerate()
-            .map(|(x, y)| (*y, (x as f64) / len));
-        let root_area = SVGBackend::new(&fname, (1024, 768)).into_drawing_area();
-        root_area.fill(&WHITE).unwrap();
-        let mut ctx = ChartBuilder::on(&root_area)
-            .set_label_area_size(LabelAreaPosition::Left, 40)
-            .set_label_area_size(LabelAreaPosition::Bottom, 40)
-            .build_cartesian_2d(0.0f64..estimator.max_estimate, 0.0f64..1.05f64)
-            .unwrap();
-        ctx.configure_mesh().draw().unwrap();
-        ctx.draw_series(LineSeries::new(
-            enumerated,
-            ShapeStyle {
-                color: BLACK.into(),
-                filled: false,
-                stroke_width: 2,
-            },
-        ))
-        .unwrap();
+        let mut sorted_estimates = estimator.estimates.clone();
+        draw_cdf(
+            &fname,
+            &mut sorted_estimates,
+            0.0f64..estimator.max_estimate,
+        );
+    }
+
+    if let Some(fname) = args.difference_cdf {
+        let mut diffs: Vec<_> = std::iter::zip(estimator.estimates, estimator.actual_values)
+            .map(|(est, act)| (est - (act as f64)).abs())
+            .collect();
+        diffs.sort_by(|a, b| a.partial_cmp(b).unwrap());
+        let diff_data = Data::new(diffs.clone());
+        println!("Diffs Means: {}", diff_data.mean().unwrap());
+        println!("Diffs Medians: {}", diff_data.median());
+        println!("Diffs Variance: {}", diff_data.variance().unwrap());
+        let high = diffs.last().unwrap() + 0.5f64;
+        draw_cdf(&fname, &mut diffs, 0.0..high);
     }
 }
