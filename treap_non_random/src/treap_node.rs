@@ -235,25 +235,14 @@ where
         let left_test = self
             .left
             .as_ref()
-            .map(|n| n.element.priority() <= self.element.priority())
+            .map(|n| (n.element.priority() <= self.element.priority() && n.maintains_heap()))
             .unwrap_or(true);
         let right_test = self
             .right
             .as_ref()
-            .map(|n| n.element.priority() <= self.element.priority())
+            .map(|n| (n.element.priority() <= self.element.priority() && n.maintains_heap()))
             .unwrap_or(true);
-        left_test
-            && right_test
-            && self
-                .left
-                .as_ref()
-                .map(|n| n.maintains_heap())
-                .unwrap_or(true)
-            && self
-                .right
-                .as_ref()
-                .map(|n| n.maintains_heap())
-                .unwrap_or(true)
+        left_test && right_test
     }
 }
 
