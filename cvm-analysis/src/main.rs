@@ -2,6 +2,7 @@ use count_unique_cvm::CountUnique;
 
 use clap::command;
 use clap::Parser;
+use plotters::prelude::*;
 use rand::prelude::*;
 use rand::rngs::StdRng;
 use statrs::statistics::Data;
@@ -22,7 +23,7 @@ struct Args {
     #[arg(short, long, default_value_t = 65535)]
     max_token: u64,
     #[arg(short, long)]
-    plot: Option<String>,
+    tokens_cdf: Option<String>,
 }
 
 struct Estimator<R: Rng> {
@@ -45,7 +46,7 @@ impl<R: Rng> Estimator<R> {
             actual_values: vec![],
             min_estimate: f64::MAX,
             max_estimate: f64::MIN,
-            stream_rng: stream_rng,
+            stream_rng,
             min_token: min,
             max_token: max,
             token_set: Default::default(),
@@ -85,7 +86,7 @@ fn main() {
         let _ = estimator.estimate_tokens(args.tokens);
     }
 
-    let estimated = Data::new(estimator.estimates);
+    let estimated = Data::new(estimator.estimates.clone());
     let real_as_vec: Vec<f64> = estimator
         .actual_values
         .iter()
@@ -103,5 +104,34 @@ fn main() {
         estimated.variance().unwrap(),
         real.variance().unwrap()
     );
-    // TODO: Add plotting.
+    if let Some(fname) = args.tokens_cdf {
+        {
+            estimator
+                .estimates
+                .sort_by(|a, b| a.partial_cmp(b).unwrap());
+        }
+        let len = estimator.estimates.len() as f64;
+        let enumerated = estimator
+            .estimates
+            .iter()
+            .enumerate()
+            .map(|(x, y)| (*y, (x as f64) / len));
+        let root_area = SVGBackend::new(&fname, (1024, 768)).into_drawing_area();
+        root_area.fill(&WHITE).unwrap();
+        let mut ctx = ChartBuilder::on(&root_area)
+            .set_label_area_size(LabelAreaPosition::Left, 40)
+            .set_label_area_size(LabelAreaPosition::Bottom, 40)
+            .build_cartesian_2d(0.0f64..estimator.max_estimate, 0.0f64..1.05f64)
+            .unwrap();
+        ctx.configure_mesh().draw().unwrap();
+        ctx.draw_series(LineSeries::new(
+            enumerated,
+            ShapeStyle {
+                color: BLACK.into(),
+                filled: false,
+                stroke_width: 2,
+            },
+        ))
+        .unwrap();
+    }
 }

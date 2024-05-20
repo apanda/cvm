@@ -162,7 +162,7 @@ where
     /// for one we might have nothing to replace it with. The Treap itself takes
     /// care of this problem.
     pub fn delete(&mut self, e: &T) -> bool {
-        match &self.element.value().cmp(&e) {
+        match &self.element.value().cmp(e) {
             Ordering::Equal => {
                 panic!("You don't want to do this, it is bad idea.")
             }
