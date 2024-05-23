@@ -10,13 +10,12 @@
 //!
 //! // Create a CountUnique CVM which stores at most 4 elements.
 //! let mut c = CountUnique::new(rand::thread_rng(), 4);
-//! let v = vec![0..100];
-//! for i in v {
-//!     c.add_token(*v);
+//! for i in 0..100 {
+//!     c.add_token(i);
 //! }
 //! // The actual value depends on the random number generator,
 //! // but should be close.
-//! println!("Estimated number of tokens are {}", c.estimate());
+//! println!("Estimated number of tokens are {}", c.estimate().unwrap());
 //! ```
 #![deny(missing_docs)]
 
