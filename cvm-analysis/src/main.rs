@@ -20,7 +20,7 @@ struct Args {
     repeat: usize,
     #[arg(short, long, default_value_t = 23)]
     min_token: u64,
-    #[arg(short, long, default_value_t = 65535)]
+    #[arg(short, long, default_value_t = 65535 + 23)]
     max_token: u64,
     #[arg(short, long)]
     tokens_cdf: Option<String>,
