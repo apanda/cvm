@@ -2,6 +2,8 @@
 name = "count_unique_cvm"
 version = "0.1.0"
 edition = "2021"
+authors = ["Aurojit Panda <apanda@cs.nyu.edu>"]
+license = "BSD-2-Clause"
 
 [dependencies]
 conv = "0.3.3"
