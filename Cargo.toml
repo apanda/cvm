@@ -1,3 +1,6 @@
 [workspace]
 members=["treap_non_random", "count_unique_cvm", "cvm-analysis"]
 resolver="2"
+
+[patch.crates-io]
+pathfinder_simd = { git = "https://github.com/meadowsys/pathfinder", branch = "stdarch_arm_crc32" }

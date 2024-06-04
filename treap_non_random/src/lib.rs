@@ -35,6 +35,7 @@
 #![deny(missing_docs)]
 mod data;
 mod treap_node;
+use alloc_counter::no_alloc;
 pub use data::Element;
 use treap_node::TreapNode;
 
@@ -102,16 +103,19 @@ where
     }
 
     /// Get the element with the highest priority, otherwise return `None`.
+    #[no_alloc]
     pub fn get_max(&self) -> Option<&Element<T, P>> {
         self.root.as_ref().map(|n| &n.element)
     }
 
     /// Get an element whose value is `e` if it exists, otherwise return `None`.
+    #[no_alloc]
     pub fn get(&self, e: T) -> Option<&Element<T, P>> {
         self.root.as_ref().and_then(|n| n.get(e))
     }
 
     /// Delete element whose value is `e`.
+    #[no_alloc]
     pub fn delete(&mut self, e: &T) {
         match &mut self.root {
             None => {}
