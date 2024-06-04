@@ -4,6 +4,8 @@ use std::{
     mem,
 };
 
+use alloc_counter::no_alloc;
+
 use crate::data::Element;
 use std::convert::From;
 

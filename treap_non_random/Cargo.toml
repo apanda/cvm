@@ -8,3 +8,4 @@ repository="https://github.com/apanda/cvm"
 authors = ["Aurojit Panda <apanda@cs.nyu.edu>"]
 
 [dependencies]
+alloc_counter = "0.0.4"
