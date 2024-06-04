@@ -48,6 +48,7 @@ where
     }
 
     /// Rotate the tree right.
+    #[no_alloc]
     pub fn rotate_right(&mut self) {
         // Get left subtree.
         let l = mem::take(&mut self.left);
@@ -62,6 +63,7 @@ where
     }
 
     /// Rotate the tree left.
+    #[no_alloc]
     pub fn rotate_left(&mut self) {
         let r = mem::take(&mut self.right);
         if let Some(mut q) = r {
@@ -76,6 +78,7 @@ where
     /// Check heap property holds. The goal here is to make sure that
     /// the root is always the largest value, and larger values propagate
     /// up the tree.
+    #[no_alloc]
     pub fn heap_check(&self, n: &Option<Box<TreapNode<T, P>>>) -> bool {
         if let Some(node) = n {
             node.element.priority() <= self.element.priority()
@@ -138,6 +141,7 @@ where
     /// Get the node with value `e`. Note, we do not provide a
     /// get with priorities, the tree is not set up to make that
     /// lookup efficient.
+    #[no_alloc]
     pub fn get(&self, e: T) -> Option<&Element<T, P>> {
         match &self.element.value().cmp(&e) {
             Ordering::Equal => Some(&self.element),
@@ -161,6 +165,7 @@ where
     /// Delete a node with element `e`. Note, we cannot delete the root itself,
     /// for one we might have nothing to replace it with. The Treap itself takes
     /// care of this problem.
+    #[no_alloc]
     pub fn delete(&mut self, e: &T) -> bool {
         match &self.element.value().cmp(e) {
             Ordering::Equal => {
@@ -193,6 +198,7 @@ where
         }
     }
 
+    #[no_alloc]
     fn delete_child(&mut self, child: TreapChild) {
         let done = {
             let which = match child {
